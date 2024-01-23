@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontakty GO_Lang</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #303030; /* Material UI dark theme */
+            color: #BBDEFB; /* Material UI light blue 100 */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 60%;
+            margin-bottom: 10px;
+            border: 1px solid #0D47A1; /* Material UI blue 900 */
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #424242; /* Material UI grey 800 */
+            color: #BBDEFB; /* Material UI light blue 100 */
+        }
+
+        input::placeholder {
+            color: #757575; /* Material UI grey 600 */
+            opacity: 1; /* Firefox */
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 60%;
+        }
+
+        th, td {
+            border: 1px solid #757575; /* Material UI grey 600 */
+            padding: 8px;
+            text-align: left;
+            color: #BBDEFB; /* Material UI light blue 100 */
+        }
+
+        tr:nth-child(even) {
+            background-color: #424242; /* Material UI grey 800 */
+        }
+
+        button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #0D47A1; /* Material UI blue 900 */
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #424242; /* Material UI grey 800 */
+            color: #BBDEFB; /* Material UI light blue 100 */
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .custom-contact {
+            background-color: #616161; /* Material UI grey 700 */
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content/Box */
+        .modal-content {
+            background-color: #424242; /* Material UI grey 800 */
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #0D47A1; /* Material UI blue 900 */
+            width: 80%; /* Could be more or less, depending on screen size */
+            color: #BBDEFB; /* Material UI light blue 100 */
+        }
+
+        /* Close Button */
+        .close {
+            color: #BBDEFB; /* Material UI light blue 100 */
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #0D47A1; /* Material UI blue 900 */
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+<form id="addContactForm">
+    <input type="text" id="nameInput" placeholder="Imię i Nazwisko">
+    <input type="text" id="phoneNumberInput" placeholder="Numer Telefonu" pattern="\+48\s\d{3}\s\d{3}\s\d{3}">
+    <button type="submit">Dodaj Numer</button>
+</form>
+
+<input type="text" id="searchInput" oninput="searchContacts()" placeholder="Wyszukaj Kontakt...">
+
+<table id="contactsTable">
+    <thead>
+    <tr>
+        <th>Imię i Nazwisko</th>
+        <th>Numer Telefonu</th>
+    </tr>
+    </thead>
+    <tbody id="contactsBody">
+    </tbody>
+</table>
+
+<div class="button-container">
+    <button id="prevButton" onclick="previousPage()">Poprzednia strona</button>
+    <button id="nextButton" onclick="nextPage()">Następna strona</button>
+</div>
+
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p id="modalText"></p>
+    </div>
+</div>
+
+<script>
+    let originalContactsData = [];
+    let contactsData = [];
+    let currentPage = 0;
+    const rowsPerPage = 10;
+
+    fetchContacts();
+
+    var modal = document.getElementById("myModal");
+    var span = document.getElementsByClassName("close")[0];
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    function showModal(message) {
+        document.getElementById('modalText').textContent = message;
+        modal.style.display = "block";
+    }
+
+    document.getElementById('addContactForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const nameInput = document.getElementById('nameInput');
+        const phoneNumberInput = document.getElementById('phoneNumberInput');
+        const name = nameInput.value;
+        const phoneNumber = phoneNumberInput.value;
+
+        if (!name || !phoneNumber) {
+            showModal('Imię i Nazwisko wraz z Numerem telefonu nie może być puste.');
+            return;
+        }
+
+        if (!phoneNumber.match(/^\+48\s\d{3}\s\d{3}\s\d{3}$/)) {
+            showModal('Numer telefonu musi być w tym formacie "+48 XXX XXX XXX".');
+            return;
+        }
+
+        if (/\d/.test(name)) {
+            showModal('Imię nie może zawierać cyfr.');
+            return;
+        }
+
+        fetch('/addContact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `name=${encodeURIComponent(name)}&phoneNumber=${encodeURIComponent(phoneNumber)}`,
+        })
+            .then(response => response.text())
+            .then(message => {
+                showModal(message);
+                fetchContacts();
+                nameInput.value = '';
+                phoneNumberInput.value = '';
+            });
+    });
+
+    function fetchContacts() {
+        fetch('/contacts')
+            .then(response => response.json())
+            .then(contacts => {
+                originalContactsData = contacts;
+                contactsData = [...originalContactsData];
+                displayContacts();
+                fetch('/custom-contacts')
+                    .then(response => response.json())
+                    .then(customContacts => {
+                        customContacts = customContacts.map(contact => ({...contact, isCustom: true}));
+                        originalContactsData = customContacts.concat(originalContactsData);
+                        contactsData = [...originalContactsData];
+                        displayContacts();
+                    });
+            });
+    }
+
+    function searchContacts() {
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        if (searchInput) {
+            const filteredContacts = originalContactsData.filter(contact =>
+                contact.Name.toLowerCase().includes(searchInput) ||
+                contact.PhoneNumber.toLowerCase().includes(searchInput)
+            );
+            contactsData = filteredContacts;
+        } else {
+            contactsData = [...originalContactsData];
+        }
+        currentPage = 0;
+        displayContacts();
+    }
+
+    function displayContacts() {
+        const contactsBody = document.getElementById('contactsBody');
+        contactsBody.innerHTML = '';
+        const start = currentPage * rowsPerPage;
+        const end = start + rowsPerPage;
+        const contactsToDisplay = contactsData.slice(start, end);
+        contactsToDisplay.forEach(contact => {
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            nameCell.textContent = contact.Name;
+            const phoneCell = document.createElement('td');
+            phoneCell.textContent = contact.PhoneNumber;
+            phoneCell.onclick = function() {
+                fakeCall(contact.PhoneNumber);
+            };
+            row.appendChild(nameCell);
+            row.appendChild(phoneCell);
+            if (contact.isCustom) {
+                row.classList.add('custom-contact');
+            }
+            contactsBody.appendChild(row);
+        });
+    }
+
+    function fakeCall(phoneNumber) {
+        showModal(`Wybieram numer ${phoneNumber}...`);
+        setTimeout(function() {
+            showModal('Rozmowa zakończona');
+        }, 2000);
+    }
+
+    function nextPage() {
+        currentPage++;
+        displayContacts();
+    }
+
+    function previousPage() {
+        if (currentPage > 0) {
+            currentPage--;
+        }
+        displayContacts();
+    }
+</script>
+
+</body>
+</html>
