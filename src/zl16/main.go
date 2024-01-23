@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"github.com/dimiro1/banner"
 	"github.com/gofiber/fiber/v3"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -79,6 +81,8 @@ func GenerateContacts() {
 
 // Główna funkcja
 func main() {
+
+	banner.Init(os.Stdout, true, true, strings.NewReader("    {{.AnsiColor.BrightBlue}}\n     _______     __   __     _____        _\n    |___  / |   /_ | / /    / ____|      | |\n        / /| |    | |/ /_   | |  __  ___  | |     __ _ _ __   __ _\n       / / | |    | | '_ \\  | | |_ |/ _ \\ | |    / _` | '_ \\ / _` |\n      / /__| |____| | (_) | | |__| | (_) || |___| (_| | | | | (_| |\n     /_____|______|_|\\___/   \\_____|\\___/ |______\\__,_|_| |_|\\__, |\n                                     ______                  __/ |\n                                    |______|                |___/{{.AnsiColor.Default}}\n\n    {{ .AnsiColor.BrightGreen }}\n    GoVersion: {{ .GoVersion }}\n    GOOS: {{ .GOOS }}\n    GOARCH: {{ .GOARCH }}\n    NumCPU: {{ .NumCPU }}\n    {{.AnsiColor.Default}}"))
 
 	// Wygeneruj kontakty (100) (Wywołaj funkcję)
 	GenerateContacts()

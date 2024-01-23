@@ -2,10 +2,14 @@ module zl16
 
 go 1.21
 
-require github.com/gofiber/fiber/v3 v3.0.0-20240122073415-3c4509f05447
+require (
+	github.com/dimiro1/banner v1.1.0
+	github.com/gofiber/fiber/v3 v3.0.0-20240122073415-3c4509f05447
+)
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
+	github.com/common-nighthawk/go-figure v0.0.0-20200609044655-c4b36f998cf2 // indirect
 	github.com/gofiber/utils/v2 v2.0.0-beta.3 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/klauspost/compress v1.17.4 // indirect
