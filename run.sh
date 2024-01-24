@@ -1,1 +1,1 @@
-sudo docker container run -p 1999:1999 woffleline/zl16:latest
+sudo docker container run -p 80:1999 woffleline/zl16:latest
