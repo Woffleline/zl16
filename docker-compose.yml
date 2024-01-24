@@ -1,0 +1,11 @@
+name: zl16
+
+services:
+  zl16:
+    image: woffleline/zl16:latest
+    container_name: zl16
+    ports:
+      - target: 1999
+        published: 80
+        protocol: tcp
+    restart: always
