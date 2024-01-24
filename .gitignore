@@ -1,4 +1,10 @@
 
 *.csv
 
-src/zl16/names.txt
+src/zl16/.idea/modules.xml
+
+src/zl16/.idea/vcs.xml
+
+src/zl16/.idea/workspace.xml
+
+src/zl16/.idea/
